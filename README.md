@@ -1,15 +1,139 @@
-# AI Voice Assistant
+# Murf AI Space Voice Assistant
 
-This is a browser-based voice assistant using Gemini for LLM responses and Murf AI for text to speech.
+A futuristic browser-based voice assistant built with React, Tailwind CDN, Gemini, and Murf AI. The app supports typed chat, voice input, voice output, saved discussions, a collapsible ChatGPT-style discussion sidebar, and Gemini-powered conversation continuity.
 
-## What it does
+## Demo Video
 
-- Accepts spoken input with the browser Speech Recognition API
-- Generates an AI reply with Gemini
-- Sends that response to Murf AI for voice generation
-- Plays the returned audio in the browser
+- Demo URL: `https://drive.google.com/file/d/16DGyqliCQ9XmdcjFiR45BLLiUj_v6dqo/view?usp=drivesdk`
+- Backup URL: `https://drive.google.com/file/d/1dETZh0e2bk2q4kw9P0Nfkt8Qvp75HPOt/view?usp=drivesdk`
 
-## Quick start
+## Features
+
+- Futuristic sci-fi UI with glassmorphism, neon mic controls, and dark gradient visuals
+- ChatGPT-style saved discussion history with create, switch, collapse, and delete actions
+- Browser speech recognition for voice input
+- Gemini integration for contextual AI responses
+- Murf AI integration for text-to-speech playback
+- Local discussion persistence using `localStorage`
+- Backend fallback response logic if Gemini is unavailable
+
+## Tech Stack
+
+- Frontend: HTML, React, Tailwind CDN, custom CSS
+- Backend: Node.js, Express
+- LLM: Gemini API
+- Voice Output: Murf AI
+- Voice Input: Browser Speech Recognition API
+- Deployment: Render
+
+## How It Works
+
+1. The user types a prompt or speaks through the browser mic.
+2. The frontend stores the active discussion locally and sends the current message plus recent discussion history to the backend.
+3. The backend sends the conversation context to Gemini.
+4. Gemini returns a text response.
+5. The backend sends that text to Murf AI for speech generation.
+6. The frontend plays the returned audio and appends the assistant response to the discussion thread.
+
+## Workflow
+
+### Discussion Workflow
+
+- Every discussion is saved in the browser using `localStorage`
+- The sidebar shows previous discussions like ChatGPT
+- You can create a new discussion, switch discussions, collapse the sidebar, or delete a discussion
+- Discussion titles are automatically derived from the first user message
+
+### Chat Workflow
+
+- User sends a typed or spoken message
+- Frontend posts to `POST /api/chat`
+- Backend forwards the message and prior discussion turns to Gemini
+- Gemini response is returned to the frontend
+- Frontend optionally calls `POST /api/voice` to get Murf speech output
+
+### Voice Workflow
+
+- The browser microphone uses Speech Recognition API
+- Status changes between `Listening`, `Thinking`, and `Speaking`
+- Murf audio is streamed back as a playable URL or base64 payload
+
+## Project Structure
+
+```text
+MURFAI_HACKTHON/
+|-- public/
+|   |-- app.js          # React app UI, discussion state, chat flow, voice controls
+|   |-- index.html      # Main HTML shell and CDN imports
+|   |-- styles.css      # Custom sci-fi styling and scroll behavior
+|-- .env.example        # Example environment variables
+|-- package.json        # Project scripts and dependencies
+|-- package-lock.json   # Dependency lockfile
+|-- README.md           # Project documentation
+|-- render.yaml         # Render deployment blueprint
+|-- server.js           # Express API, Gemini integration, Murf integration
+```
+
+## API Endpoints
+
+### `GET /api/health`
+
+Returns app health and configuration state.
+
+### `POST /api/chat`
+
+Request body:
+
+```json
+{
+  "message": "Tell me about Saturn",
+  "history": [
+    { "role": "user", "content": "Hi" },
+    { "role": "assistant", "content": "Hello!" }
+  ]
+}
+```
+
+Response shape:
+
+```json
+{
+  "reply": "Saturn is the sixth planet from the Sun...",
+  "provider": "gemini"
+}
+```
+
+### `POST /api/voice`
+
+Request body:
+
+```json
+{
+  "text": "Saturn is famous for its rings."
+}
+```
+
+## Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+PORT=3000
+MURF_API_KEY=your_murf_api_key_here
+MURF_VOICE_ID=en-US-natalie
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-2.5-flash
+```
+
+### Variable Reference
+
+- `PORT`: Local server port
+- `MURF_API_KEY`: Murf API key for speech generation
+- `MURF_VOICE_ID`: Murf voice ID to use for generated speech
+- `GEMINI_API_KEY`: Gemini API key for chat generation
+- `GEMINI_MODEL`: Gemini model name
+
+## Local Setup
 
 1. Install dependencies:
 
@@ -17,30 +141,49 @@ This is a browser-based voice assistant using Gemini for LLM responses and Murf 
    npm install
    ```
 
-2. Create a `.env` file from `.env.example` and add your Murf API key and Gemini API key.
+2. Create `.env` from `.env.example`
 
-3. Start the app:
+3. Start the backend:
 
    ```bash
    npm start
    ```
 
-4. Open `http://localhost:3000`
+4. Open the app:
 
-## Deploy on Render
+   ```text
+   http://localhost:3000
+   ```
 
-1. Push this project to GitHub.
-2. In Render, create a new Blueprint service from your GitHub repo.
-3. Render will detect [render.yaml](C:\Users\VISHNUVARDHAN\OneDrive\Desktop\ai_voice_project\render.yaml).
-4. In Render, add secret values for `MURF_API_KEY` and `GEMINI_API_KEY`.
-5. Deploy and open the generated `onrender.com` URL on any device.
+## Available Scripts
 
-## Recommended keys
+- `npm start`: Start the Express server
+- `npm run dev`: Start the server in watch mode
 
-- `GEMINI_API_KEY`: Gemini API key for the chatbot brain
-- `MURF_API_KEY`: Murf API key for voice output
+## Deployment
+
+### Render
+
+1. Push the repository to GitHub
+2. Create a new Blueprint service in Render
+3. Render will detect `render.yaml`
+4. Add secret environment variables:
+   - `MURF_API_KEY`
+   - `GEMINI_API_KEY`
+5. Deploy the project
 
 ## Notes
 
-- If `GEMINI_API_KEY` is missing or Gemini fails, the app falls back to a simple rules-based response.
-- Browser speech recognition works best in Chrome or Edge.
+- Browser speech recognition works best in Chrome or Edge
+- The app can still respond with fallback logic if Gemini is unavailable
+- Discussion history is currently stored in the browser, not in a database
+- Tailwind is loaded through CDN for fast prototyping
+
+## Future Improvements
+
+- Store discussions in a database for multi-device sync
+- Add user authentication
+- Add streaming AI responses
+- Add discussion rename support
+- Add voice selection in the UI
+- Replace Tailwind CDN with a production build pipeline
