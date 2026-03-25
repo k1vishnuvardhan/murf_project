@@ -13,7 +13,7 @@ services:
         sync: false
       - key: MURF_VOICE_ID
         value: en-US-natalie
-      - key: OPENROUTER_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
-      - key: OPENROUTER_MODEL
-        value: openrouter/auto
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
