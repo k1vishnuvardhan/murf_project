@@ -601,7 +601,7 @@ function App() {
                   h(
                     "p",
                     { className: "text-[11px] uppercase tracking-[0.35em] text-cyan-300/80" },
-                    "Neural Archive"
+                    "Neural astronomy"
                   ),
                   h("h1", { className: "mt-2 text-2xl font-semibold text-white" }, "Discussions")
                 ),
