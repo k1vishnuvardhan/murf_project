@@ -151,9 +151,9 @@ function App() {
         const response = await fetch(`${API_BASE}/api/health`);
         const data = await response.json();
         const murfStatus = data.murfConfigured ? "Murf ready" : "Murf key missing";
-        const llmStatus = data.geminiConfigured
-          ? "Gemini ready"
-          : "Gemini fallback";
+        const llmStatus = data.openRouterConfigured
+          ? "OpenRouter ready"
+          : "OpenRouter fallback";
 
         setHealthText(`${murfStatus} | ${llmStatus}`);
         setVoiceInfo(`Voice ${data.voiceId} | Brain ${data.llmModel}`);

@@ -1,6 +1,6 @@
 # Murf AI Space Voice Assistant
 
-A futuristic browser-based voice assistant built with React, Tailwind CDN, Gemini, and Murf AI. The app supports typed chat, voice input, voice output, saved discussions, a collapsible ChatGPT-style discussion sidebar, and Gemini-powered conversation continuity.
+A futuristic browser-based voice assistant built with React, Tailwind CDN, OpenRouter, and Murf AI. The app supports typed chat, voice input, voice output, saved discussions, a collapsible ChatGPT-style discussion sidebar, and OpenRouter-powered conversation continuity.
 
 ## Demo Video
 
@@ -12,16 +12,16 @@ A futuristic browser-based voice assistant built with React, Tailwind CDN, Gemin
 - Futuristic sci-fi UI with glassmorphism, neon mic controls, and dark gradient visuals
 - ChatGPT-style saved discussion history with create, switch, collapse, and delete actions
 - Browser speech recognition for voice input
-- Gemini integration for contextual AI responses
+- OpenRouter integration for contextual AI responses
 - Murf AI integration for text-to-speech playback
 - Local discussion persistence using `localStorage`
-- Backend fallback response logic if Gemini is unavailable
+- Backend fallback response logic if OpenRouter is unavailable
 
 ## Tech Stack
 
 - Frontend: HTML, React, Tailwind CDN, custom CSS
 - Backend: Node.js, Express
-- LLM: Gemini API
+- LLM: OpenRouter API
 - Voice Output: Murf AI
 - Voice Input: Browser Speech Recognition API
 - Deployment: Render
@@ -30,8 +30,8 @@ A futuristic browser-based voice assistant built with React, Tailwind CDN, Gemin
 
 1. The user types a prompt or speaks through the browser mic.
 2. The frontend stores the active discussion locally and sends the current message plus recent discussion history to the backend.
-3. The backend sends the conversation context to Gemini.
-4. Gemini returns a text response.
+3. The backend sends the conversation context to OpenRouter.
+4. OpenRouter returns a text response.
 5. The backend sends that text to Murf AI for speech generation.
 6. The frontend plays the returned audio and appends the assistant response to the discussion thread.
 
@@ -48,8 +48,8 @@ A futuristic browser-based voice assistant built with React, Tailwind CDN, Gemin
 
 - User sends a typed or spoken message
 - Frontend posts to `POST /api/chat`
-- Backend forwards the message and prior discussion turns to Gemini
-- Gemini response is returned to the frontend
+- Backend forwards the message and prior discussion turns to OpenRouter
+- OpenRouter response is returned to the frontend
 - Frontend optionally calls `POST /api/voice` to get Murf speech output
 
 ### Voice Workflow
@@ -71,7 +71,7 @@ MURFAI_HACKTHON/
 |-- package-lock.json   # Dependency lockfile
 |-- README.md           # Project documentation
 |-- render.yaml         # Render deployment blueprint
-|-- server.js           # Express API, Gemini integration, Murf integration
+|-- server.js           # Express API, OpenRouter integration, Murf integration
 ```
 
 ## API Endpoints
@@ -99,7 +99,7 @@ Response shape:
 ```json
 {
   "reply": "Saturn is the sixth planet from the Sun...",
-  "provider": "gemini"
+  "provider": "openrouter"
 }
 ```
 
@@ -121,8 +121,8 @@ Create a `.env` file in the project root:
 PORT=3000
 MURF_API_KEY=your_murf_api_key_here
 MURF_VOICE_ID=en-US-natalie
-GEMINI_API_KEY=your_gemini_api_key_here
-GEMINI_MODEL=gemini-2.5-flash
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+OPENROUTER_MODEL=openrouter/auto
 ```
 
 ### Variable Reference
@@ -130,8 +130,8 @@ GEMINI_MODEL=gemini-2.5-flash
 - `PORT`: Local server port
 - `MURF_API_KEY`: Murf API key for speech generation
 - `MURF_VOICE_ID`: Murf voice ID to use for generated speech
-- `GEMINI_API_KEY`: Gemini API key for chat generation
-- `GEMINI_MODEL`: Gemini model name
+- `OPENROUTER_API_KEY`: OpenRouter API key for chat generation
+- `OPENROUTER_MODEL`: OpenRouter model name
 
 ## Local Setup
 
@@ -169,13 +169,13 @@ GEMINI_MODEL=gemini-2.5-flash
 3. Render will detect `render.yaml`
 4. Add secret environment variables:
    - `MURF_API_KEY`
-   - `GEMINI_API_KEY`
+   - `OPENROUTER_API_KEY`
 5. Deploy the project
 
 ## Notes
 
 - Browser speech recognition works best in Chrome or Edge
-- The app can still respond with fallback logic if Gemini is unavailable
+- The app can still respond with fallback logic if OpenRouter is unavailable
 - Discussion history is currently stored in the browser, not in a database
 - Tailwind is loaded through CDN for fast prototyping
 

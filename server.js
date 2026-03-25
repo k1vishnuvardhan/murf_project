@@ -8,6 +8,10 @@ const HOST = process.env.HOST || "0.0.0.0";
 const MURF_API_KEY = process.env.MURF_API_KEY;
 const MURF_VOICE_ID = process.env.MURF_VOICE_ID || "en-US-natalie";
 const MURF_API_URL = "https://api.murf.ai/v1/speech/generate";
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const OPENROUTER_MODEL =
+  process.env.OPENROUTER_MODEL || "openrouter/auto";
+const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 const GEMINI_API_URL =
@@ -43,26 +47,38 @@ function generateBotReply(message) {
   const normalized = message.toLowerCase();
 
   if (normalized.includes("hello") || normalized.includes("hi")) {
-    return "Hello! I am your voice assistant. How can I help you today?";
+    return "Hello! I am your astronomy voice assistant. Ask me about planets, stars, black holes, galaxies, or space missions.";
   }
 
   if (normalized.includes("who are you") || normalized.includes("what can you do")) {
-    return "I am a browser based voice assistant that can answer questions, help with ideas, and speak responses aloud using AI voice synthesis.";
+    return "I am a browser-based astronomy assistant that explains space topics, answers questions about the universe, and speaks responses aloud.";
+  }
+
+  if (
+    normalized.includes("planet")
+    || normalized.includes("star")
+    || normalized.includes("galaxy")
+    || normalized.includes("moon")
+    || normalized.includes("black hole")
+    || normalized.includes("nasa")
+    || normalized.includes("space")
+  ) {
+    return `You asked about space: ${message}. I can help explain astronomy concepts, solar system facts, missions, and cosmic phenomena in a simple way.`;
   }
 
   if (normalized.includes("time")) {
-    return "I cannot check your local clock directly, but I can still help with questions, explanations, and spoken responses.";
+    return "I cannot check your local clock directly, but I can absolutely help with astronomy questions, constellations, planets, and space science.";
   }
 
   if (normalized.includes("weather")) {
-    return "I do not have live weather data connected right now, but I can still help with general questions and conversation.";
+    return "I do not have live weather data connected right now, but I can still help with sky, space, and astronomy questions.";
   }
 
   if (normalized.includes("bye")) {
-    return "Goodbye. I am here whenever you need me again.";
+    return "Goodbye. I will be here whenever you want to explore the universe again.";
   }
 
-  return `You said: ${message}. I can help with general questions, simple brainstorming, explanations, and spoken replies.`;
+  return `I am tuned for astronomy-first conversations. Ask me about planets, stars, galaxies, telescopes, black holes, astronauts, or space exploration.`;
 }
 
 function normalizeHistory(history) {
@@ -85,6 +101,46 @@ function normalizeHistory(history) {
     }));
 }
 
+function astronomySystemPrompt() {
+  return "You are a premium futuristic astronomy voice assistant. Your main purpose is to answer questions about space, astronomy, planets, stars, galaxies, cosmology, observatories, and space missions. Stay focused on astronomy by default, respond naturally, stay concise, and preserve helpful conversational continuity from prior turns. If a question is outside astronomy, answer briefly but try to relate it back to space or clearly state that your specialty is astronomy.";
+}
+
+async function generateOpenRouterReply(message, history = []) {
+  const response = await fetch(OPENROUTER_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+      "HTTP-Referer": "http://localhost:3000",
+      "X-OpenRouter-Title": "Murf Voice Bot Hackathon"
+    },
+    body: JSON.stringify({
+      model: OPENROUTER_MODEL,
+      temperature: 0.5,
+      max_tokens: 180,
+      messages: [
+        {
+          role: "system",
+          content: astronomySystemPrompt()
+        },
+        ...normalizeHistory(history),
+        {
+          role: "user",
+          content: message
+        }
+      ]
+    })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error?.message || "OpenRouter API request failed.");
+  }
+
+  return data.choices?.[0]?.message?.content?.trim() || generateBotReply(message);
+}
+
 function buildGeminiContents(history, message) {
   const contents = normalizeHistory(history).map((entry) => ({
     role: entry.role === "assistant" ? "model" : "user",
@@ -99,11 +155,7 @@ function buildGeminiContents(history, message) {
   return contents;
 }
 
-async function generateContextualReply(message, history = []) {
-  if (!GEMINI_API_KEY) {
-    return generateBotReply(message);
-  }
-
+async function generateGeminiReply(message, history = []) {
   const response = await fetch(GEMINI_API_URL, {
     method: "POST",
     headers: {
@@ -114,8 +166,7 @@ async function generateContextualReply(message, history = []) {
       systemInstruction: {
         parts: [
           {
-            text:
-              "You are a premium futuristic voice assistant. Respond naturally, stay concise, and preserve helpful conversational continuity from prior turns."
+            text: astronomySystemPrompt()
           }
         ]
       },
@@ -133,21 +184,32 @@ async function generateContextualReply(message, history = []) {
     throw new Error(data.error?.message || "Gemini API request failed.");
   }
 
-  const reply = data.candidates?.[0]?.content?.parts
+  return data.candidates?.[0]?.content?.parts
     ?.map((part) => part.text || "")
     .join("")
-    .trim();
+    .trim() || generateBotReply(message);
+}
 
-  return reply || generateBotReply(message);
+async function generateContextualReply(message, history = []) {
+  if (OPENROUTER_API_KEY) {
+    return generateOpenRouterReply(message, history);
+  }
+
+  if (GEMINI_API_KEY) {
+    return generateGeminiReply(message, history);
+  }
+
+  return generateBotReply(message);
 }
 
 app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
     murfConfigured: Boolean(MURF_API_KEY),
+    openRouterConfigured: Boolean(OPENROUTER_API_KEY),
     geminiConfigured: Boolean(GEMINI_API_KEY),
     voiceId: MURF_VOICE_ID,
-    llmModel: GEMINI_MODEL
+    llmModel: OPENROUTER_API_KEY ? OPENROUTER_MODEL : GEMINI_MODEL
   });
 });
 
@@ -162,14 +224,18 @@ app.post("/api/chat", async (req, res) => {
     const reply = await generateContextualReply(message.trim(), history);
     return res.json({
       reply,
-      provider: GEMINI_API_KEY ? "gemini" : "fallback"
+      provider: OPENROUTER_API_KEY
+        ? "openrouter"
+        : GEMINI_API_KEY
+          ? "gemini"
+          : "fallback"
     });
   } catch (error) {
     const fallbackReply = generateBotReply(message.trim());
     return res.json({
       reply: fallbackReply,
       provider: "fallback",
-      warning: `Gemini unavailable: ${error.message}`
+      warning: `OpenRouter unavailable: ${error.message}`
     });
   }
 });
