@@ -4,7 +4,7 @@ A futuristic browser-based voice assistant built with React, Tailwind CDN, OpenR
 
 ## Demo Video
 
-- Demo URL: `https://drive.google.com/file/d/16DGyqliCQ9XmdcjFiR45BLLiUj_v6dqo/view?usp=drivesdk`
+- Demo URL: `https://drive.google.com/file/d/1x-QM74RoE-DZzPpisLeyCqfglJZEFqJj/view?usp=drivesdk`
 - Backup URL: `https://drive.google.com/file/d/1dETZh0e2bk2q4kw9P0Nfkt8Qvp75HPOt/view?usp=drivesdk`
 
 ## Features
